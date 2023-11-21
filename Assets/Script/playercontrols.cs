@@ -22,14 +22,14 @@ public class playercontrols : MonoBehaviour
 
     void Update()
     {
-        movementInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        movementInput = new Vector2(0f, Input.GetAxisRaw("Vertical"));
 
-        anim.SetFloat("X", movementInput.x);
+        anim.SetFloat("X", 0f);  // No horizontal movement
         anim.SetFloat("Y", movementInput.y);
         anim.SetFloat("Speed", movementInput.sqrMagnitude);
 
         // Check for jump input and if the player is grounded
-        if (Input.GetKeyDown(KeyCode.W) && isGrounded)
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             Jump();
         }
@@ -41,7 +41,7 @@ public class playercontrols : MonoBehaviour
         GroundedCheck();
 
         // Player movement
-        rigidBody.velocity = new Vector2(movementInput.x * playerSpeed, rigidBody.velocity.y);
+        rigidBody.velocity = new Vector2(playerSpeed, rigidBody.velocity.y);  // Constant forward movement
     }
 
     void Jump()
@@ -54,5 +54,19 @@ public class playercontrols : MonoBehaviour
         // Perform a simple grounded check using a Raycast
         // Adjust the length of the Raycast depending on your character's size and the ground setup
         isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 0.1f);
+    }
+
+    [System.Obsolete]
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Check if the player collides with an object tagged as "wall"
+        if (collision.gameObject.CompareTag("wall"))
+        {
+            // Deactivate the player object
+            gameObject.SetActive(false);
+
+            // Display the game over UI
+            FindObjectOfType<GameOverUI>().ShowGameOver();
+        }
     }
 }
